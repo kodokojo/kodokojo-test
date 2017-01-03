@@ -1,17 +1,17 @@
 /**
- * Kodo Kojo - Software factory done right
- * Copyright © 2016 Kodo Kojo (infos@kodokojo.io)
- * <p>
+ * Kodo Kojo - ${project.description}
+ * Copyright © 2017 Kodo Kojo (infos@kodokojo.io)
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * <p>
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * <p>
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -101,7 +101,7 @@ public class ApplicationGiven<SELF extends ApplicationGiven<?>> extends Stage<SE
             }
 
             @Override
-            public int port() {
+            public Integer port() {
                 return rabbitMq.getPort();
             }
 
@@ -121,12 +121,27 @@ public class ApplicationGiven<SELF extends ApplicationGiven<?>> extends Stage<SE
             }
 
             @Override
+            public String deadLetterExchangeName() {
+                return "deadEx";
+            }
+
+            @Override
+            public String deadLetterQueueName() {
+                return "deadQu";
+            }
+
+            @Override
             public String login() {
                 return null;
             }
 
             @Override
             public String password() {
+                return null;
+            }
+
+            @Override
+            public Integer maxRedeliveryMessageCount() {
                 return null;
             }
         };
@@ -153,7 +168,7 @@ public class ApplicationGiven<SELF extends ApplicationGiven<?>> extends Stage<SE
             @Singleton
             RabbitMqEventBus provideRabbitMqEventBus(RabbitMqConfig rabbitMqConfig, EventBuilderFactory eventBuilderFactory, VersionConfig versionConfig) {
                 ServiceInfo serviceInfo = new ServiceInfo(microServiceConfig.name(), microServiceConfig.uuid(), versionConfig.version(), versionConfig.gitSha1(), versionConfig.branch());
-                RabbitMqEventBus rabbitMqEventBus = new RabbitMqEventBus(rabbitMqConfig, microServiceConfig, ApplicationGiven.this, ApplicationGiven.this, eventBuilderFactory, serviceInfo);
+                RabbitMqEventBus rabbitMqEventBus = new RabbitMqEventBus(rabbitMqConfig, ApplicationGiven.this, ApplicationGiven.this, microServiceConfig, serviceInfo);
                 rabbitMqEventBus.connect();
                 return rabbitMqEventBus;
             }

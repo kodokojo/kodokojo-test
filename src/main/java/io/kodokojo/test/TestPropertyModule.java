@@ -1,6 +1,6 @@
 /**
- * Kodo Kojo - Software factory done right
- * Copyright © 2016 Kodo Kojo (infos@kodokojo.io)
+ * Kodo Kojo - ${project.description}
+ * Copyright © 2017 Kodo Kojo (infos@kodokojo.io)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -76,8 +76,6 @@ public class TestPropertyModule extends AbstractModule {
         SystemPropertyValueProvider systemPropertyValueProvider = new SystemPropertyValueProvider();
         valueProviders.add(systemPropertyValueProvider);
 
-        RedisDockerLinkPropertyValueProvider redisDockerLinkPropertyValueProvider = new RedisDockerLinkPropertyValueProvider(systemEnvValueProvider);
-        valueProviders.add(redisDockerLinkPropertyValueProvider);
         return valueProvider;
     }
 
