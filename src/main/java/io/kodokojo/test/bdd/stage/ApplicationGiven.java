@@ -144,6 +144,11 @@ public class ApplicationGiven<SELF extends ApplicationGiven<?>> extends Stage<SE
             public Integer maxRedeliveryMessageCount() {
                 return null;
             }
+
+            @Override
+            public String virtualHost() {
+                return "/";
+            }
         };
         eventBusModule = new AbstractModule() {
             @Override
@@ -209,6 +214,11 @@ public class ApplicationGiven<SELF extends ApplicationGiven<?>> extends Stage<SE
                     @Override
                     public Integer port() {
                         return redisPort;
+                    }
+
+                    @Override
+                    public String password() {
+                        return null;
                     }
                 };
             }
