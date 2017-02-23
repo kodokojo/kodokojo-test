@@ -85,6 +85,11 @@ public class RabbitMqListerner {
             }
 
             @Override
+            public String virtualHost() {
+                return "/";
+            }
+
+            @Override
             public Integer maxRedeliveryMessageCount() {
                 return 4;
             }

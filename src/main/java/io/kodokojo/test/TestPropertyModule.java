@@ -98,6 +98,11 @@ public class TestPropertyModule extends AbstractModule {
             public Integer port() {
                 return redisPort;
             }
+
+            @Override
+            public String password() {
+                return null;
+            }
         };
     }
 
