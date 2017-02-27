@@ -18,6 +18,7 @@
 package io.kodokojo.test.bdd.stage;
 
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.inject.Injector;
@@ -165,9 +166,11 @@ public class ApplicationWhen<SELF extends ApplicationWhen<?>> extends Stage<SELF
                         Repository repository = injector.getInstance(Repository.class);
                         boolean expectedNewUser = repository.identifierExpectedNewUser(creationRequest.getId());
                         if (expectedNewUser) {
+                            boolean entityNotExist = false;
                             String entity = creationRequest.getEntityId();
                             if (StringUtils.isBlank(creationRequest.getEntityId())) {
                                 entity = repository.addEntity(new Entity(creationRequest.getEmail()));
+                                entityNotExist = true;
                             }
 
                             KeyPair keyPair = RSAUtils.generateRsaKeyPair();
@@ -182,7 +185,11 @@ public class ApplicationWhen<SELF extends ApplicationWhen<?>> extends Stage<SELF
                                     .setSshPublicKey(RSAUtils.encodePublicKey((RSAPublicKey) keyPair.getPublic(), creationRequest.getEmail()))
                                     .build();
                             repository.addUser(user);
-                            repository.addUserToEntity(creationRequest.getId(), entity);
+                            if (entityNotExist) {
+                                repository.addAdminToEntity(creationRequest.getId(), entity);
+                            } else {
+                                repository.addUserToEntity(creationRequest.getId(), entity);
+                            }
                             UserCreationReply userCreationReply = new UserCreationReply(creationRequest.getId(), keyPair, creationRequest.getEmail(), false, true);
 
                             eventBuilder.setPayload(userCreationReply);
@@ -199,17 +206,18 @@ public class ApplicationWhen<SELF extends ApplicationWhen<?>> extends Stage<SELF
         });
 
         OkHttpClient httpClient = new OkHttpClient();
-        RequestBody body = RequestBody.create(MediaType.parse("application/json"), ("{\"email\": \"" + email + "\"}").getBytes());
+        RequestBody body = RequestBody.create(MediaType.parse("application/json"), ("{\"email\": \"" + email + "\" }").getBytes());
         String baseUrl = getBaseUrl();
 
-        Request.Builder builder = new Request.Builder().post(body).url(baseUrl + "/api/v1/user" + (newUserId != null ? "/" + newUserId : ""));
+        Request.Builder builder = new Request.Builder().url(baseUrl + "/api/v1/user" + (newUserId != null ? "/" + newUserId : ""));
         if (isNotBlank(currentUserLogin)) {
             UserInfo currentUser = currentUsers.get(currentUserLogin);
             if (currentUser != null) {
                 builder = HttpUserSupport.addBasicAuthentification(currentUser, builder);
+                body = RequestBody.create(MediaType.parse("application/json"), ("{\"email\": \"" + email + "\", \"organisation\": \"" + currentUser.getEntityIds().iterator().next() + "\"}").getBytes());
             }
         }
-        Request request = builder.build();
+        Request request = builder.post(body).build();
         Response response = null;
         try {
             response = httpClient.newCall(request).execute();
@@ -223,7 +231,8 @@ public class ApplicationWhen<SELF extends ApplicationWhen<?>> extends Stage<SELF
                         String currentUserPassword = json.getAsJsonPrimitive("password").getAsString();
                         String currentUserEmail = json.getAsJsonPrimitive("email").getAsString();
                         String currentUserIdentifier = json.getAsJsonPrimitive("identifier").getAsString();
-                        String currentUserEntityIdentifier = json.getAsJsonPrimitive("entityIdentifier").getAsString();
+                        JsonArray entityIdentifiers = json.getAsJsonArray("organisationIds");
+                        String currentUserEntityIdentifier = entityIdentifiers.get(0).getAsString();
                         currentUsers.put(currentUsername, new UserInfo(currentUsername, currentUserIdentifier, currentUserEntityIdentifier, currentUserPassword, currentUserEmail));
                         if (isBlank(currentUserLogin)) {
                             currentUserLogin = currentUsername;
@@ -289,7 +298,7 @@ public class ApplicationWhen<SELF extends ApplicationWhen<?>> extends Stage<SELF
                 String entityIdentifier = dto.getEntityIdentifier();
                 if (StringUtils.isBlank(entityIdentifier)) {
                     User user = repository.getUserByIdentifier(dto.getOwnerIdentifier());
-                    entityIdentifier = user.getEntityIdentifier();
+                    entityIdentifier = user.getOrganisationIds().iterator().next();
                 }
                 projectConfigurationBuilder.setEntityIdentifier(entityIdentifier);
                 if (dto.getStackConfigs() == null) {
@@ -394,7 +403,7 @@ public class ApplicationWhen<SELF extends ApplicationWhen<?>> extends Stage<SELF
     public SELF update_user_$_with_password_$(@Quoted String username, @Quoted String password, boolean updateSSH) {
         UserInfo currentUser = currentUsers.get(currentUserLogin);
         UserInfo userToChange = currentUsers.get(username);
-        UserInfo userChanged = new UserInfo(userToChange.getUsername(), userToChange.getIdentifier(), userToChange.getEntityId(), password, userToChange.getEmail());
+        UserInfo userChanged = new UserInfo(userToChange.getUsername(), userToChange.getIdentifier(), userToChange.getEntityIds(), password, userToChange.getEmail());
         httpUserSupport.updateUser(currentUser, userChanged);
         return self();
     }

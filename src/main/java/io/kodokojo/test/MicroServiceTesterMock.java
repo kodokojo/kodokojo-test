@@ -27,6 +27,7 @@ import io.kodokojo.commons.event.*;
 import io.kodokojo.commons.model.ServiceInfo;
 import io.kodokojo.commons.rabbitmq.RabbitMqConnectionFactory;
 import io.kodokojo.commons.rabbitmq.RabbitMqEventBus;
+import io.kodokojo.commons.rabbitmq.RabbitMqProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,12 +95,15 @@ public class MicroServiceTesterMock extends RabbitMqEventBus implements JsonToEv
 
     @Override
     public void connect() {
-        super.connect();
 
         try {
+            RabbitMqConnectionFactory connectionFactory = new RabbitMqConnectionFactory() {};
+            connection = connectionFactory.createFromRabbitMqConfig(rabbitMqConfig);
 
-            channel = connection.createChannel();
-            connection.addShutdownListener(cause -> LOGGER.error("RAbbitMq Shutdown !", cause));
+            //  Configure default Exchange, service queue, etc...
+            final Channel channel = connection.createChannel();
+            producer = new RabbitMqProducer(connection.createChannel());
+            connection.addShutdownListener(cause -> LOGGER.error("RabbitMq Shutdown !", cause));
             String from = "mock";
 
             DefaultConsumer consumer = new DefaultConsumer(channel) {
@@ -119,6 +123,9 @@ public class MicroServiceTesterMock extends RabbitMqEventBus implements JsonToEv
 
             channel.queueDeclare("mock", true, false, false, null);
             channel.basicConsume("mock", false, consumer);
+
+            channel.exchangeDeclare(rabbitMqConfig.businessExchangeName(), "fanout", true, false, null);
+            channel.queueBind("mock", rabbitMqConfig.businessExchangeName(), "");
             channel.queueDeclare("mock-local", true, false, false, null);
             channel.basicConsume("mock-local", false, consumer);
 

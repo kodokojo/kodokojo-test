@@ -33,6 +33,8 @@ import io.kodokojo.commons.service.repository.Repository;
 import okhttp3.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -44,6 +46,7 @@ import static org.assertj.core.api.Assertions.fail;
 
 public class ApplicationThen<SELF extends ApplicationThen<?>> extends Stage<SELF> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationThen.class);
 
     @ExpectedScenarioState
     Repository repository;
@@ -113,11 +116,11 @@ public class ApplicationThen<SELF extends ApplicationThen<?>> extends Stage<SELF
     public SELF user_$_belong_to_entity_of_project_configuration(@Quoted String username) {
         UserInfo requesterUserInfo = currentUsers.get(currentUserLogin);
         User user = repository.getUserByIdentifier(requesterUserInfo.getIdentifier());
-        String entityIdOfCurrentUser = user.getEntityIdentifier();
+        String entityIdOfCurrentUser = user.getOrganisationIds().iterator().next();
         assertThat(entityIdOfCurrentUser).isNotNull();
         UserInfo userToValidate = currentUsers.get(username);
         user = repository.getUserByIdentifier(userToValidate.getIdentifier());
-        String entityIdOfUserToValidate = user.getEntityIdentifier();
+        String entityIdOfUserToValidate = user.getOrganisationIds().iterator().next();
         assertThat(entityIdOfUserToValidate).isEqualTo(entityIdOfCurrentUser);
         return self();
     }
@@ -184,7 +187,7 @@ public class ApplicationThen<SELF extends ApplicationThen<?>> extends Stage<SELF
     public SELF user_$_belong_to_entity_$(String username, String entityName) {
         UserInfo userInfo = currentUsers.get(username);
         User user = repository.getUserByIdentifier(userInfo.getIdentifier());
-        String entityIdOfUserId = user.getEntityIdentifier();
+        String entityIdOfUserId = user.getOrganisationIds().iterator().next();
         Entity entity = repository.getEntityById(entityIdOfUserId);
         assertThat(entity).isNotNull();
         assertThat(entity.getName()).isEqualTo(entityName);
@@ -227,6 +230,10 @@ public class ApplicationThen<SELF extends ApplicationThen<?>> extends Stage<SELF
             JsonParser parser = new JsonParser();
             String body = response.body().string();
             JsonObject json = (JsonObject) parser.parse(body);
+            if (LOGGER.isDebugEnabled()) {
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                LOGGER.debug("Receive user detail :\n{}", gson.toJson(json));
+            }
 
             assertThat(json.getAsJsonPrimitive("name").getAsString()).isNotEmpty();
             if (complete) {
@@ -274,7 +281,7 @@ public class ApplicationThen<SELF extends ApplicationThen<?>> extends Stage<SELF
             Gson gson = new GsonBuilder().create();
             ProjectConfigDto projectConfigDto = gson.fromJson(bodyResponse, ProjectConfigDto.class);
             assertThat(projectConfigDto).isNotNull();
-            //assertThat(projectConfigDto.getAdmins().get(0).getUsername()).isEqualTo(requesterUserInfo.getUsername());
+            //assertThat(projectConfigDto.getTeamLeaders().get(0).getUsername()).isEqualTo(requesterUserInfo.getUsername());
             assertThat(projectConfigDto.getUsers()).isNotEmpty();
             assertThat(projectConfigDto.getStackConfigs()).isNotEmpty();
 

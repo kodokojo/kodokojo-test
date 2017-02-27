@@ -19,28 +19,34 @@ package io.kodokojo.test.bdd.stage;
 
 import io.kodokojo.commons.model.User;
 
+import java.util.Collections;
+import java.util.Set;
+
 public class UserInfo {
 
     private final String username;
 
     private final String identifier;
 
-    private final String entityId;
+    private final Set<String> entityIds;
 
     private final String password;
 
     private final String email;
 
-    public UserInfo(String username, String identifier, String entityId, String password, String email) {
+    public UserInfo(String username, String identifier, Set<String> entityIds, String password, String email) {
         this.username = username;
-        this.entityId = entityId;
+        this.entityIds = entityIds;
         this.identifier = identifier;
         this.password = password;
         this.email = email;
     }
+    public UserInfo(String username, String identifier, String entityId, String password, String email) {
+        this(username, identifier, Collections.singleton(entityId), password, email);
+    }
 
     public UserInfo(User user) {
-        this(user.getUsername(), user.getIdentifier(), user.getEntityIdentifier(), user.getPassword(), user.getEmail());
+        this(user.getUsername(), user.getIdentifier(), user.getOrganisationIds(), user.getPassword(), user.getEmail());
     }
 
     public String getUsername() {
@@ -51,8 +57,8 @@ public class UserInfo {
         return identifier;
     }
 
-    public String getEntityId() {
-        return entityId;
+    public Set<String> getEntityIds() {
+        return entityIds;
     }
 
     public String getPassword() {
