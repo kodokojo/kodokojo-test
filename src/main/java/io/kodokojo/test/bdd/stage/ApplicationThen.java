@@ -27,7 +27,7 @@ import com.tngtech.jgiven.annotation.Quoted;
 import com.tngtech.jgiven.attachment.Attachment;
 import io.kodokojo.commons.dto.ProjectConfigDto;
 import io.kodokojo.commons.dto.UserLightDto;
-import io.kodokojo.commons.model.Entity;
+import io.kodokojo.commons.model.Organisation;
 import io.kodokojo.commons.model.User;
 import io.kodokojo.commons.service.repository.Repository;
 import okhttp3.*;
@@ -188,9 +188,9 @@ public class ApplicationThen<SELF extends ApplicationThen<?>> extends Stage<SELF
         UserInfo userInfo = currentUsers.get(username);
         User user = repository.getUserByIdentifier(userInfo.getIdentifier());
         String entityIdOfUserId = user.getOrganisationIds().iterator().next();
-        Entity entity = repository.getEntityById(entityIdOfUserId);
-        assertThat(entity).isNotNull();
-        assertThat(entity.getName()).isEqualTo(entityName);
+        Organisation organisation = repository.getOrganisationById(entityIdOfUserId);
+        assertThat(organisation).isNotNull();
+        assertThat(organisation.getName()).isEqualTo(entityName);
         return self();
     }
 

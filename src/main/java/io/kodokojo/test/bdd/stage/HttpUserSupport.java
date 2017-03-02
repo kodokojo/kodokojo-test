@@ -31,7 +31,7 @@ import io.kodokojo.commons.event.Event;
 import io.kodokojo.commons.event.EventBuilder;
 import io.kodokojo.commons.event.payload.UserCreationReply;
 import io.kodokojo.commons.event.payload.UserCreationRequest;
-import io.kodokojo.commons.model.Entity;
+import io.kodokojo.commons.model.Organisation;
 import io.kodokojo.commons.model.User;
 import io.kodokojo.commons.model.UserBuilder;
 import io.kodokojo.commons.service.repository.Repository;
@@ -183,7 +183,7 @@ public class HttpUserSupport {
                         if (expectedNewUser) {
                             String entity = creationRequest.getEntityId();
                             if (StringUtils.isBlank(creationRequest.getEntityId())) {
-                                entity = repository.addEntity(new Entity(creationRequest.getEmail()));
+                                entity = repository.addOrganisation(new Organisation(creationRequest.getEmail()));
                             }
 
                             KeyPair keyPair = RSAUtils.generateRsaKeyPair();
@@ -198,7 +198,7 @@ public class HttpUserSupport {
                                     .setSshPublicKey(RSAUtils.encodePublicKey((RSAPublicKey) keyPair.getPublic(), creationRequest.getEmail()))
                                     .build();
                             repository.addUser(user);
-                            repository.addUserToEntity(creationRequest.getId(), entity);
+                            repository.addUserToOrganisation(creationRequest.getId(), entity);
                             UserCreationReply userCreationReply = new UserCreationReply(creationRequest.getId(), keyPair, creationRequest.getEmail(), false, true);
 
                             eventBuilder.setPayload(userCreationReply);

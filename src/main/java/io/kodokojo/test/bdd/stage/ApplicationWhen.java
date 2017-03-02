@@ -169,7 +169,7 @@ public class ApplicationWhen<SELF extends ApplicationWhen<?>> extends Stage<SELF
                             boolean entityNotExist = false;
                             String entity = creationRequest.getEntityId();
                             if (StringUtils.isBlank(creationRequest.getEntityId())) {
-                                entity = repository.addEntity(new Entity(creationRequest.getEmail()));
+                                entity = repository.addOrganisation(new Organisation(creationRequest.getEmail()));
                                 entityNotExist = true;
                             }
 
@@ -186,9 +186,9 @@ public class ApplicationWhen<SELF extends ApplicationWhen<?>> extends Stage<SELF
                                     .build();
                             repository.addUser(user);
                             if (entityNotExist) {
-                                repository.addAdminToEntity(creationRequest.getId(), entity);
+                                repository.addAdminToOrganisation(creationRequest.getId(), entity);
                             } else {
-                                repository.addUserToEntity(creationRequest.getId(), entity);
+                                repository.addUserToOrganisation(creationRequest.getId(), entity);
                             }
                             UserCreationReply userCreationReply = new UserCreationReply(creationRequest.getId(), keyPair, creationRequest.getEmail(), false, true);
 
