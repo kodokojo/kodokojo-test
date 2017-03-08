@@ -226,12 +226,13 @@ public class ApplicationWhen<SELF extends ApplicationWhen<?>> extends Stage<SELF
                     case 201:
                         JsonParser parser = new JsonParser();
                         String bodyResponse = response.body().string();
+                        System.out.println(bodyResponse);
                         JsonObject json = (JsonObject) parser.parse(bodyResponse);
                         String currentUsername = json.getAsJsonPrimitive("username").getAsString();
                         String currentUserPassword = json.getAsJsonPrimitive("password").getAsString();
                         String currentUserEmail = json.getAsJsonPrimitive("email").getAsString();
                         String currentUserIdentifier = json.getAsJsonPrimitive("identifier").getAsString();
-                        JsonArray entityIdentifiers = json.getAsJsonArray("organisationIds");
+                        JsonArray entityIdentifiers = json.getAsJsonArray("organisationIdentifiers");
                         String currentUserEntityIdentifier = entityIdentifiers.get(0).getAsString();
                         currentUsers.put(currentUsername, new UserInfo(currentUsername, currentUserIdentifier, currentUserEntityIdentifier, currentUserPassword, currentUserEmail));
                         if (isBlank(currentUserLogin)) {
