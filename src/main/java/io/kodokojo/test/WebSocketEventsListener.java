@@ -17,13 +17,7 @@
  */
 package io.kodokojo.test;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.websocket.*;
-import java.util.LinkedList;
-
-public class WebSocketEventsListener extends Endpoint{
+public class WebSocketEventsListener { /*extends Endpoint{
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WebSocketEventsListener.class);
 
@@ -70,4 +64,6 @@ public class WebSocketEventsListener extends Endpoint{
     public LinkedList<String> getMessages() {
         return new LinkedList<>(messages);
     }
+
+    */
 }
