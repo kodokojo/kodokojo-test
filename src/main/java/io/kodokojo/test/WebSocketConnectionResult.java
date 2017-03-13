@@ -17,10 +17,8 @@
  */
 package io.kodokojo.test;
 
-import javax.websocket.Session;
-
 public class WebSocketConnectionResult {
-
+/*
     private final Session session;
 
     private final WebSocketEventsListener listener;
@@ -43,5 +41,5 @@ public class WebSocketConnectionResult {
     public WebSocketEventsListener getListener() {
         return listener;
     }
-
+*/
 }

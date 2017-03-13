@@ -1,17 +1,17 @@
 /**
  * Kodo Kojo - ${project.description}
  * Copyright © 2017 Kodo Kojo (infos@kodokojo.io)
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * <p>
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -36,23 +36,14 @@ import io.kodokojo.commons.model.User;
 import io.kodokojo.commons.model.UserBuilder;
 import io.kodokojo.commons.service.repository.Repository;
 import io.kodokojo.test.MicroServiceTesterMock;
-import io.kodokojo.test.WebSocketConnectionResult;
-import io.kodokojo.test.WebSocketEventsListener;
 import okhttp3.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.glassfish.tyrus.client.ClientManager;
-import org.glassfish.tyrus.client.ClientProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.websocket.ClientEndpointConfig;
-import javax.websocket.DeploymentException;
-import javax.websocket.Session;
 import java.io.IOException;
 import java.io.Serializable;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.security.KeyPair;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -60,8 +51,6 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang.StringUtils.isBlank;
@@ -177,38 +166,38 @@ public class HttpUserSupport {
                 EventBuilder eventBuilder = eventBuilderFactory.create();
                 eventBuilder.setEventType(Event.USER_CREATION_REPLY);
                 eventBuilder.setCorrelationId(event.getCorrelationId());
-                    try {
-                        Repository repository = injector.getInstance(Repository.class);
-                        boolean expectedNewUser = repository.identifierExpectedNewUser(creationRequest.getId());
-                        if (expectedNewUser) {
-                            String entity = creationRequest.getEntityId();
-                            if (StringUtils.isBlank(creationRequest.getEntityId())) {
-                                entity = repository.addOrganisation(new Organisation(creationRequest.getEmail()));
-                            }
-
-                            KeyPair keyPair = RSAUtils.generateRsaKeyPair();
-                            User user = new UserBuilder()
-                                    .setIdentifier(creationRequest.getId())
-                                    .setEmail(creationRequest.getEmail())
-                                    .setEntityIdentifier(entity)
-                                    .setFirstName(creationRequest.getUsername())
-                                    .setLastName(creationRequest.getUsername())
-                                    .setUsername(creationRequest.getUsername())
-                                    .setPassword("1234")
-                                    .setSshPublicKey(RSAUtils.encodePublicKey((RSAPublicKey) keyPair.getPublic(), creationRequest.getEmail()))
-                                    .build();
-                            repository.addUser(user);
-                            repository.addUserToOrganisation(creationRequest.getId(), entity);
-                            UserCreationReply userCreationReply = new UserCreationReply(creationRequest.getId(), keyPair, creationRequest.getEmail(), false, true);
-
-                            eventBuilder.setPayload(userCreationReply);
-                        } else {
-                            UserCreationReply userCreationReply = new UserCreationReply(creationRequest.getId(), null, creationRequest.getEmail(), false, false);
-                            eventBuilder.setPayload(userCreationReply);
+                try {
+                    Repository repository = injector.getInstance(Repository.class);
+                    boolean expectedNewUser = repository.identifierExpectedNewUser(creationRequest.getId());
+                    if (expectedNewUser) {
+                        String entity = creationRequest.getEntityId();
+                        if (StringUtils.isBlank(creationRequest.getEntityId())) {
+                            entity = repository.addOrganisation(new Organisation(creationRequest.getEmail()));
                         }
-                    } catch (NoSuchAlgorithmException e) {
-                        fail(e.getMessage());
+
+                        KeyPair keyPair = RSAUtils.generateRsaKeyPair();
+                        User user = new UserBuilder()
+                                .setIdentifier(creationRequest.getId())
+                                .setEmail(creationRequest.getEmail())
+                                .setEntityIdentifier(entity)
+                                .setFirstName(creationRequest.getUsername())
+                                .setLastName(creationRequest.getUsername())
+                                .setUsername(creationRequest.getUsername())
+                                .setPassword("1234")
+                                .setSshPublicKey(RSAUtils.encodePublicKey((RSAPublicKey) keyPair.getPublic(), creationRequest.getEmail()))
+                                .build();
+                        repository.addUser(user);
+                        repository.addUserToOrganisation(creationRequest.getId(), entity);
+                        UserCreationReply userCreationReply = new UserCreationReply(creationRequest.getId(), keyPair, creationRequest.getEmail(), false, true);
+
+                        eventBuilder.setPayload(userCreationReply);
+                    } else {
+                        UserCreationReply userCreationReply = new UserCreationReply(creationRequest.getId(), null, creationRequest.getEmail(), false, false);
+                        eventBuilder.setPayload(userCreationReply);
                     }
+                } catch (NoSuchAlgorithmException e) {
+                    fail(e.getMessage());
+                }
 
                 eventBus.reply(event, eventBuilder.build());
             }
@@ -250,7 +239,7 @@ public class HttpUserSupport {
             String currentUserPassword = json.getAsJsonPrimitive("password").getAsString();
             String currentUserEmail = json.getAsJsonPrimitive("email").getAsString();
             String currentUserIdentifier = json.getAsJsonPrimitive("identifier").getAsString();
-            String currentUserEntityIdentifier = json.getAsJsonPrimitive("entityIdentifier").getAsString();
+            String currentUserEntityIdentifier = json.getAsJsonArray("organisationIdentifiers").get(0).getAsString();
             UserInfo res = new UserInfo(currentUsername, currentUserIdentifier, currentUserEntityIdentifier, currentUserPassword, currentUserEmail);
             return res;
 
@@ -276,7 +265,7 @@ public class HttpUserSupport {
                 "}";
     }
 
-
+/*
     public Session connectToWebSocketEvent(UserInfo user, WebSocketEventsListener listener) {
         final ClientEndpointConfig cec = ClientEndpointConfig.Builder.create().build();
 
@@ -328,6 +317,7 @@ public class HttpUserSupport {
 
         return new WebSocketConnectionResult(session, listener);
     }
+    */
 
     public String createProjectConfiguration(String projectName, StackConfigDto stackConfigDto, UserInfo currentUser) {
         if (isBlank(projectName)) {
@@ -482,7 +472,7 @@ public class HttpUserSupport {
 
     }
 
-
+/*
     private class WebSocketEventsCallbackWrapper implements WebSocketEventsListener.CallBack {
 
         private final WebSocketEventsListener.CallBack delegate;
@@ -520,5 +510,6 @@ public class HttpUserSupport {
             delegate.close(session);
         }
     }
+    */
 
 }
