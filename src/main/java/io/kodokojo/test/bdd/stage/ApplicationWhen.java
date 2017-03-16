@@ -167,8 +167,8 @@ public class ApplicationWhen<SELF extends ApplicationWhen<?>> extends Stage<SELF
                         boolean expectedNewUser = repository.identifierExpectedNewUser(creationRequest.getId());
                         if (expectedNewUser) {
                             boolean entityNotExist = false;
-                            String entity = creationRequest.getEntityId();
-                            if (StringUtils.isBlank(creationRequest.getEntityId())) {
+                            String entity = creationRequest.getOrganisationId();
+                            if (StringUtils.isBlank(creationRequest.getOrganisationId())) {
                                 entity = repository.addOrganisation(new Organisation(creationRequest.getEmail()));
                                 entityNotExist = true;
                             }

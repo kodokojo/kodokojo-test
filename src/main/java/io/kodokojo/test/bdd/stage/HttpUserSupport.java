@@ -170,8 +170,8 @@ public class HttpUserSupport {
                     Repository repository = injector.getInstance(Repository.class);
                     boolean expectedNewUser = repository.identifierExpectedNewUser(creationRequest.getId());
                     if (expectedNewUser) {
-                        String entity = creationRequest.getEntityId();
-                        if (StringUtils.isBlank(creationRequest.getEntityId())) {
+                        String entity = creationRequest.getOrganisationId();
+                        if (StringUtils.isBlank(creationRequest.getOrganisationId())) {
                             entity = repository.addOrganisation(new Organisation(creationRequest.getEmail()));
                         }
 
