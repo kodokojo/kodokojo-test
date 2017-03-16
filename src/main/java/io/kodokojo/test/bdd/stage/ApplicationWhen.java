@@ -214,7 +214,7 @@ public class ApplicationWhen<SELF extends ApplicationWhen<?>> extends Stage<SELF
             UserInfo currentUser = currentUsers.get(currentUserLogin);
             if (currentUser != null) {
                 builder = HttpUserSupport.addBasicAuthentification(currentUser, builder);
-                body = RequestBody.create(MediaType.parse("application/json"), ("{\"email\": \"" + email + "\", \"organisation\": \"" + currentUser.getEntityIds().iterator().next() + "\"}").getBytes());
+                body = RequestBody.create(MediaType.parse("application/json"), ("{\"email\": \"" + email + "\", \"organisationId\": \"" + currentUser.getEntityIds().iterator().next() + "\"}").getBytes());
             }
         }
         Request request = builder.post(body).build();

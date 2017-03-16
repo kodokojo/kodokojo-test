@@ -124,6 +124,7 @@ public interface DockerTestApplicationBuilder {
         CreateContainerResponse createContainerResponse = dockerClient.createContainerCmd(imageName + ":" + tag)
                 .withExposedPorts(exposedPorts)
                 .withPortBindings(portBinding)
+                .withEnv("JAVA_OPTS=-Djenkins.install.runSetupWizard=false")
                 .exec();
         dockerClient.startContainerCmd(createContainerResponse.getId()).exec();
         dockerTestSupport.addContainerIdToClean(createContainerResponse.getId());
