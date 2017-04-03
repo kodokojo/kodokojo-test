@@ -296,7 +296,7 @@ public class ApplicationWhen<SELF extends ApplicationWhen<?>> extends Stage<SELF
                 }
                 projectConfigurationBuilder.setAdmins(users);
                 projectConfigurationBuilder.setUsers(users);
-                String entityIdentifier = dto.getEntityIdentifier();
+                String entityIdentifier = dto.getOrganisationIdentifier();
                 if (StringUtils.isBlank(entityIdentifier)) {
                     User user = repository.getUserByIdentifier(dto.getOwnerIdentifier());
                     entityIdentifier = user.getOrganisationIds().iterator().next();
