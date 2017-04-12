@@ -289,7 +289,7 @@ public class ApplicationWhen<SELF extends ApplicationWhen<?>> extends Stage<SELF
                 Repository repository = injector.getInstance(Repository.class);
                 ProjectConfigurationBuilder projectConfigurationBuilder = new ProjectConfigurationBuilder();
                 projectConfigurationBuilder.setName(dto.getName());
-                List<User> users = new ArrayList<User>();
+                List<User> users = new ArrayList<>();
                 users.add(repository.getUserByIdentifier(dto.getOwnerIdentifier()));
                 if (dto.getUserIdentifiers() != null) {
                     dto.getUserIdentifiers().stream().map(repository::getUserByIdentifier).collect(Collectors.toList());
